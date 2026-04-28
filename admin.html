@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Payment Approvals</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/payment-config.js"></script>
+    <script src="js/payment.js"></script>
+    <script src="js/main.js" defer></script>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <nav>
+                <a href="index.html" class="logo">Online Academy - Admin</a>
+                <div class="mobile-menu" onclick="toggleMobileMenu()">☰</div>
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="#" class="active">Admin Panel</a></li>
+                    <li><a href="#" id="logoutLink" onclick="adminLogout()">Logout</a></li>
+                </ul>
+                <div class="nav-auth">
+                    <span id="adminEmail" style="color: var(--gray);"></span>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <section class="dashboard">
+        <div class="container">
+            <div class="dashboard-header">
+                <h1>Payment Approvals</h1>
+            </div>
+
+            <div class="dashboard-stats">
+                <div class="stat-card">
+                    <h3>Pending</h3>
+                    <div class="value" id="pendingCount" style="color: #f59e0b;">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Approved</h3>
+                    <div class="value" id="approvedCount" style="color: #10b981;">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Students</h3>
+                    <div class="value" id="totalStudents">0</div>
+                </div>
+            </div>
+
+            <h2 style="margin: 2rem 0 1rem;">Pending Payments (WhatsApp)</h2>
+            <div id="pendingPayments"></div>
+
+            <h2 style="margin: 2rem 0 1rem;">All Payments</h2>
+            <div id="allPayments"></div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Online Academy</h4>
+                    <p>Admin Panel</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Online Academy. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const ADMIN_EMAIL = "lavanyapeiris.edu@gmail.com";
+        const WHATSAPP_NUMBER = "+94760920335";
+        let allPayments = [];
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            const isLoggedIn = localStorage.getItem('adminLoggedIn') === 'true';
+            
+            if (!isLoggedIn) {
+                const password = prompt('Enter admin password:');
+                if (password !== 'admin123') {
+                    alert('Incorrect password');
+                    window.location.href = 'index.html';
+                    return;
+                }
+                localStorage.setItem('adminLoggedIn', 'true');
+            }
+
+            document.getElementById('adminEmail').textContent = ADMIN_EMAIL;
+
+            await initFirebase();
+            await loadAllData();
+        });
+
+        async function loadAllData() {
+            try {
+                allPayments = await getAllPayments();
+                displayPendingPayments();
+                displayAllPayments();
+                updateStats();
+                loadStudentCount();
+            } catch (error) {
+                console.error('Error loading data:', error);
+            }
+        }
+
+        function displayPendingPayments() {
+            const container = document.getElementById('pendingPayments');
+            const pending = allPayments.filter(p => p.status === 'pending' || p.status === 'whatsapp_sent' || p.status === undefined);
+
+            if (pending.length === 0) {
+                container.innerHTML = '<p style="color: var(--gray); padding: 1rem;">No pending payments. Students will contact you via WhatsApp.</p>';
+                return;
+            }
+
+            let html = '';
+            pending.forEach(payment => {
+                const date = payment.createdAt ? new Date(payment.createdAt.seconds * 1000).toLocaleDateString() : 'N/A';
+                const courseName = payment.courseName || payment.course;
+                
+                html += `
+                    <div class="enrolled-course" style="margin-bottom: 1rem; border-left: 4px solid #25D366;">
+                        <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 1rem;">
+                            <div>
+                                <h4>${payment.studentName}</h4>
+                                <p>📧 Email: ${payment.studentEmail}</p>
+                                <p>📱 Phone: ${payment.phone || 'N/A'}</p>
+                                <p>📚 Course: ${courseName}</p>
+                                <p>📅 Exam Year: ${payment.examYear || 'N/A'}</p>
+                                <p>💰 Type: ${payment.paymentType === 'registration' ? 'Registration' : 'Monthly'} Payment</p>
+                                <p>📆 Submitted: ${date}</p>
+                                ${payment.note ? `<p>📝 Note: ${payment.note}</p>` : ''}
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                                <a href="https://wa.me/${WHATSAPP_NUMBER}?text=Hi ${payment.firstName || payment.studentName}, your payment has been received. Welcome to Online Academy!" target="_blank" class="btn btn-success" style="font-size: 0.875rem; text-align: center; text-decoration: none;">💬 Send Welcome</a>
+                                <button onclick="approvePayment('${payment.id}')" class="btn btn-primary" style="font-size: 0.875rem; background: #10b981;">✓ Approve</button>
+                                <button onclick="rejectPayment('${payment.id}')" class="btn" style="font-size: 0.875rem; background: #dc2626; color: white;">✗ Reject</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function displayAllPayments() {
+            const container = document.getElementById('allPayments');
+            
+            if (allPayments.length === 0) {
+                container.innerHTML = '<p style="color: var(--gray);">No payments yet.</p>';
+                return;
+            }
+
+            let html = '';
+            allPayments.forEach(payment => {
+                const statusClass = payment.status === 'approved' ? '#10b981' : 
+                                   (payment.status === 'pending' || payment.status === 'whatsapp_sent') ? '#f59e0b' : '#dc2626';
+                const date = payment.createdAt ? new Date(payment.createdAt.seconds * 1000).toLocaleDateString() : 'N/A';
+                
+                html += `
+                    <div class="enrolled-course" style="margin-bottom: 0.5rem; opacity: ${payment.status === 'rejected' ? 0.6 : 1};">
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                            <div>
+                                <strong>${payment.studentName}</strong> - ${payment.paymentType === 'registration' ? 'Registration' : 'Monthly'} Payment
+                                <span style="color: ${statusClass}; margin-left: 0.5rem; font-weight: bold;">${payment.status ? payment.status.toUpperCase() : 'PENDING'}</span>
+                            </div>
+                            <div>
+                                ${(payment.status === 'pending' || payment.status === 'whatsapp_sent' || !payment.status) ? 
+                                `<button onclick="approvePayment('${payment.id}')" class="btn btn-success" style="font-size: 0.75rem; padding: 0.5rem;">Approve</button>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function updateStats() {
+            const pending = allPayments.filter(p => p.status === 'pending' || p.status === 'whatsapp_sent' || !p.status).length;
+            const approved = allPayments.filter(p => p.status === 'approved').length;
+
+            document.getElementById('pendingCount').textContent = pending;
+            document.getElementById('approvedCount').textContent = approved;
+        }
+
+        async function loadStudentCount() {
+            try {
+                const snapshot = await db.collection('students').get();
+                document.getElementById('totalStudents').textContent = snapshot.size;
+            } catch (error) {
+                console.error('Error getting student count:', error);
+            }
+        }
+
+        async function approvePayment(paymentId) {
+            if (!confirm('Approve this student payment?')) return;
+            
+            try {
+                await window.approvePayment(paymentId, ADMIN_EMAIL);
+                alert('Payment approved! Student can now access courses.');
+                await loadAllData();
+            } catch (error) {
+                console.error('Approve error:', error);
+                alert('Failed to approve payment');
+            }
+        }
+
+        async function rejectPayment(paymentId) {
+            const reason = prompt('Rejection reason (optional):');
+            
+            try {
+                await window.rejectPayment(paymentId, reason || 'Payment rejected by admin');
+                alert('Payment rejected');
+                await loadAllData();
+            } catch (error) {
+                console.error('Reject error:', error);
+                alert('Failed to reject payment');
+            }
+        }
+
+        function adminLogout() {
+            if (confirm('Logout from admin?')) {
+                localStorage.removeItem('adminLoggedIn');
+                window.location.href = 'index.html';
+            }
+        }
+    </script>
+</body>
+</html>

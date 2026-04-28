@@ -8,7 +8,10 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
     <script src="js/firebase-config.js"></script>
+    <script src="js/payment-config.js"></script>
+    <script src="js/payment.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/main.js" defer></script>
 </head>
@@ -35,14 +38,15 @@
     <div class="page-header">
         <div class="container">
             <h1>Register</h1>
-            <p>Create your student account</p>
+            <p>Create your student account & Complete Payment</p>
         </div>
     </div>
 
     <section class="dashboard">
         <div class="container">
-            <div class="form-container">
+            <div id="registrationStep" class="form-container">
                 <form id="registerForm">
+                    <h3 style="margin-bottom: 1.5rem;">Step 1: Account Details</h3>
                     <div class="form-group">
                         <label for="firstName">First Name</label>
                         <input type="text" id="firstName" name="firstName" required>
@@ -65,12 +69,17 @@
                     </div>
                     <div class="form-group">
                         <label for="course">Select Course</label>
-                        <select id="course" name="course" required>
+                        <select id="course" name="course" required onchange="updateCourseDetails()">
                             <option value="">Choose a course</option>
                             <option value="sinhala">Sinhala Language</option>
                             <option value="media">Media Studies</option>
                         </select>
                         <div id="courseError" class="form-error hidden"></div>
+                    </div>
+                    <div id="courseDetails" class="course-details-box" style="display: none; background: #f0f9ff; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                        <h4 id="selectedCourseName"></h4>
+                        <p>Registration Fee: <strong id="regFee">-</strong></p>
+                        <p>Monthly Fee: <strong id="monthlyFee">-</strong></p>
                     </div>
                     <div class="form-group">
                         <label for="age">Age</label>
@@ -99,11 +108,41 @@
                         <input type="password" id="confirmPassword" name="confirmPassword" required>
                         <div id="confirmPasswordError" class="form-error hidden"></div>
                     </div>
-                    <button type="submit" class="btn btn-primary" style="width: 100%;">Register</button>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Continue to Payment</button>
                 </form>
                 <div class="form-links">
                     <p>Already have an account? <a href="login.html">Login here</a></p>
                 </div>
+            </div>
+
+            <div id="paymentStep" class="form-container" style="display: none;">
+                <h3 style="margin-bottom: 1.5rem;">Step 2: Payment</h3>
+                
+                <div class="payment-instructions" style="background: #25D366; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem; color: white;">
+                    <h4 style="margin-bottom: 1rem;">💬 Complete Payment via WhatsApp</h4>
+                    <p>Click the button below to send your payment details via WhatsApp.</p>
+                    <p style="margin-top: 0.5rem; font-size: 0.875rem;">Our team will verify and approve your registration.</p>
+                </div>
+
+                <div id="whatsappButtonContainer" style="text-align: center;">
+                    <a id="whatsappLink" href="#" onclick="openWhatsApp()" class="btn btn-success" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 1rem 2rem; font-size: 1.1rem; background: #25D366; width: 100%; justify-content: center; text-decoration: none;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                        Send via WhatsApp
+                    </a>
+                </div>
+
+                <div style="text-align: center; margin-top: 1rem;">
+                    <button type="button" onclick="completeRegistration()" class="btn btn-primary" style="width: 100%;">I've Sent WhatsApp - Complete Registration</button>
+                    <button type="button" onclick="goBackToRegistration()" class="btn btn-outline" style="width: 100%; margin-top: 0.5rem;">Back</button>
+                </div>
+            </div>
+
+            <div id="successStep" class="form-container" style="display: none; text-align: center;">
+                <div style="font-size: 4rem; margin-bottom: 1rem;">✓</div>
+                <h2>Registration Complete!</h2>
+                <p style="margin: 1rem 0;">Your registration is complete. Your payment is pending approval.</p>
+                <p style="color: var(--gray);">We will verify your payment slip and send you an email once approved.</p>
+                <a href="dashboard.html" class="btn btn-primary" style="margin-top: 1rem;">Go to Dashboard</a>
             </div>
         </div>
     </section>
@@ -130,6 +169,26 @@
     </footer>
 
     <script>
+        let registeredUserData = null;
+        let registeredUserId = null;
+
+        function updateCourseDetails() {
+            const course = document.getElementById('course').value;
+            const courseDetails = document.getElementById('courseDetails');
+            
+            if (course) {
+                const details = getCoursePaymentDetails(course);
+                if (details) {
+                    document.getElementById('selectedCourseName').textContent = details.name;
+                    document.getElementById('regFee').textContent = details.registrationFee > 0 ? 'Rs. ' + details.registrationFee : 'Contact for fee';
+                    document.getElementById('monthlyFee').textContent = details.monthlyFee > 0 ? 'Rs. ' + details.monthlyFee + '/month' : 'Contact for fee';
+                    courseDetails.style.display = 'block';
+                }
+            } else {
+                courseDetails.style.display = 'none';
+            }
+        }
+
         document.getElementById('registerForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -145,7 +204,6 @@
             
             let isValid = true;
             
-            // Clear previous errors
             hideError('firstNameError');
             hideError('lastNameError');
             hideError('emailError');
@@ -156,74 +214,106 @@
             hideError('passwordError');
             hideError('confirmPasswordError');
             
-            // Validation
-            if (!firstName) {
-                showError('firstNameError', 'First name is required');
-                isValid = false;
-            }
-            if (!lastName) {
-                showError('lastNameError', 'Last name is required');
-                isValid = false;
-            }
-            if (!email) {
-                showError('emailError', 'Email is required');
-                isValid = false;
-            }
-            if (!phone) {
-                showError('phoneError', 'Phone number is required');
-                isValid = false;
-            }
-            if (!course) {
-                showError('courseError', 'Please select a course');
-                isValid = false;
-            }
-            if (!age) {
-                showError('ageError', 'Age is required');
-                isValid = false;
-            }
-            if (!examYear) {
-                showError('examYearError', 'Please select exam year');
-                isValid = false;
-            }
-            if (password.length < 6) {
-                showError('passwordError', 'Password must be at least 6 characters');
-                isValid = false;
-            }
-            if (password !== confirmPassword) {
-                showError('confirmPasswordError', 'Passwords do not match');
-                isValid = false;
-            }
+            if (!firstName) { showError('firstNameError', 'First name is required'); isValid = false; }
+            if (!lastName) { showError('lastNameError', 'Last name is required'); isValid = false; }
+            if (!email) { showError('emailError', 'Email is required'); isValid = false; }
+            if (!phone) { showError('phoneError', 'Phone number is required'); isValid = false; }
+            if (!course) { showError('courseError', 'Please select a course'); isValid = false; }
+            if (!age) { showError('ageError', 'Age is required'); isValid = false; }
+            if (!examYear) { showError('examYearError', 'Please select exam year'); isValid = false; }
+            if (password.length < 6) { showError('passwordError', 'Password must be at least 6 characters'); isValid = false; }
+            if (password !== confirmPassword) { showError('confirmPasswordError', 'Passwords do not match'); isValid = false; }
             
             if (!isValid) return;
             
             const submitBtn = this.querySelector('button[type="submit"]');
             submitBtn.disabled = true;
-            submitBtn.textContent = 'Registering...';
+            submitBtn.textContent = 'Processing...';
             
             try {
                 await initFirebase();
                 
-                const userData = {
-                    firstName,
-                    lastName,
-                    phone,
-                    course,
-                    age,
-                    examYear
-                };
+                const userData = { firstName, lastName, phone, course, age, examYear };
                 
                 await registerUser(email, password, userData);
-                alert('Registration successful! Welcome to Online Academy.');
-                window.location.href = 'dashboard.html';
+                
+                const user = JSON.parse(localStorage.getItem('user') || 'null');
+                registeredUserData = userData;
+                registeredUserId = user.uid;
+                
+                showPaymentStep();
             } catch (error) {
                 console.error('Registration error:', error);
                 const message = getErrorMessage(error);
                 alert('Registration failed: ' + message);
             } finally {
                 submitBtn.disabled = false;
-                submitBtn.textContent = 'Register';
+                submitBtn.textContent = 'Continue to Payment';
             }
         });
+
+        function showPaymentStep() {
+            const user = JSON.parse(localStorage.getItem('user') || 'null');
+            const courseDetails = getCoursePaymentDetails(user.course);
+            const courseName = courseDetails ? courseDetails.name : user.course;
+            
+            const phoneNumber = '+94760920335';
+            const message = `*New Student Registration*%0A%0A` +
+                `*Name:* ${registeredUserData.firstName} ${registeredUserData.lastName}%0A` +
+                `*Email:* ${user.email}%0A` +
+                `*Phone:* ${registeredUserData.phone}%0A` +
+                `*Course:* ${courseName}%0A` +
+                `*Age:* ${registeredUserData.age}%0A` +
+                `*Exam Year:* ${registeredUserData.examYear}%0A%0A` +
+                `Please verify my payment. Thank you!`;
+            
+            const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
+            document.getElementById('whatsappLink').href = whatsappUrl;
+            
+            document.getElementById('paymentDate').valueAsDate = new Date();
+            
+            document.getElementById('registrationStep').style.display = 'none';
+            document.getElementById('paymentStep').style.display = 'block';
+        }
+
+        function openWhatsApp() {
+            const link = document.getElementById('whatsappLink');
+            window.open(link.href, '_blank');
+        }
+
+        function goBackToRegistration() {
+            document.getElementById('paymentStep').style.display = 'none';
+            document.getElementById('registrationStep').style.display = 'block';
+        }
+
+        async function completeRegistration() {
+            const user = JSON.parse(localStorage.getItem('user') || 'null');
+            const courseDetails = getCoursePaymentDetails(user.course);
+            
+            const paymentData = {
+                studentId: registeredUserId,
+                studentName: registeredUserData.firstName + ' ' + registeredUserData.lastName,
+                studentEmail: user.email,
+                course: user.course,
+                courseName: courseDetails ? courseDetails.name : user.course,
+                paymentType: 'registration',
+                phone: registeredUserData.phone,
+                age: registeredUserData.age,
+                examYear: registeredUserData.examYear,
+                amount: 0,
+                status: 'whatsapp_sent'
+            };
+            
+            try {
+                await savePaymentRecord(paymentData);
+                document.getElementById('paymentStep').style.display = 'none';
+                document.getElementById('successStep').style.display = 'block';
+            } catch (error) {
+                console.error('Error saving registration:', error);
+                document.getElementById('paymentStep').style.display = 'none';
+                document.getElementById('successStep').style.display = 'block';
+            }
+        }
     </script>
 </body>
 </html>

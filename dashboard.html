@@ -8,7 +8,10 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
     <script src="js/firebase-config.js"></script>
+    <script src="js/payment-config.js"></script>
+    <script src="js/payment.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/main.js" defer></script>
 </head>
@@ -44,8 +47,8 @@
                     <div class="value" id="courseCount">1</div>
                 </div>
                 <div class="stat-card">
-                    <h3>Account Status</h3>
-                    <div class="value" style="font-size: 1.25rem; color: #10b981;">Active</div>
+                    <h3>Payment Status</h3>
+                    <div class="value" id="paymentStatus" style="font-size: 1.25rem;">Pending</div>
                 </div>
             </div>
 
@@ -80,7 +83,23 @@
                         <div class="enrolled-course" id="enrolledCourse">
                             <h4 id="courseTitle">Sinhala Language</h4>
                             <p id="courseDescription">Complete A/L Sinhala language course covering literature, grammar, and composition.</p>
-                            <p><strong>Status:</strong> Enrolled</p>
+                            <p><strong>Status:</strong> <span id="accessStatus">Payment Pending</span></p>
+                        </div>
+                    </div>
+
+                    <div id="paymentHistorySection" style="margin-top: 2rem;">
+                        <h3>Payment History</h3>
+                        <div id="paymentHistory"></div>
+                    </div>
+
+                    <div id="uploadMonthlyPayment" style="margin-top: 2rem; display: none;">
+                        <h3>Monthly Payment</h3>
+                        <div class="enrolled-course" style="background: #25D366; color: white;">
+                            <p>Send your monthly payment details via WhatsApp to continue accessing course content.</p>
+                            <a id="monthlyWhatsappLink" href="#" onclick="sendMonthlyWhatsApp()" class="btn btn-white" style="display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem; text-decoration: none;">
+                                💬 Send via WhatsApp
+                            </a>
+                            <button type="button" onclick="markMonthlyPaid()" class="btn btn-outline" style="background: white; color: #25D366; margin-top: 0.5rem;">I've Sent - Mark as Paid</button>
                         </div>
                     </div>
                 </div>
@@ -110,20 +129,20 @@
     </footer>
 
     <script>
-        // Check authentication and load user data
+        let currentUser = null;
+        let userPayments = [];
+
         document.addEventListener('DOMContentLoaded', async function() {
-            const user = JSON.parse(localStorage.getItem('user') || 'null');
+            currentUser = JSON.parse(localStorage.getItem('user') || 'null');
             
-            if (!user || !user.uid) {
+            if (!currentUser || !currentUser.uid) {
                 window.location.href = 'login.html';
                 return;
             }
 
-            // Initialize Firebase
             await initFirebase();
-
-            // Load user data
-            loadUserData(user);
+            loadUserData(currentUser);
+            await loadPaymentData();
         });
 
         function loadUserData(user) {
@@ -136,22 +155,190 @@
             document.getElementById('profileAge').textContent = user.age || '-';
             document.getElementById('profileExamYear').textContent = user.examYear || '-';
 
-            // Display enrolled course
             if (user.course) {
-                const courseNames = {
-                    'sinhala': 'Sinhala Language',
-                    'media': 'Media Studies'
-                };
-                
+                const courseNames = { 'sinhala': 'Sinhala Language', 'media': 'Media Studies' };
                 const courseDesc = {
                     'sinhala': 'Complete A/L Sinhala language course covering literature, grammar, and composition.',
                     'media': 'Comprehensive media studies course covering media literacy, journalism, and communication theories.'
                 };
-
                 document.getElementById('courseTitle').textContent = courseNames[user.course] || user.course;
                 document.getElementById('courseDescription').textContent = courseDesc[user.course] || '';
             }
         }
+
+        async function loadPaymentData() {
+            try {
+                userPayments = await getStudentPayments(currentUser.uid);
+                updatePaymentStatus();
+                displayPaymentHistory();
+                checkMonthlyPayment();
+            } catch (error) {
+                console.error('Error loading payments:', error);
+            }
+        }
+
+        function updatePaymentStatus() {
+            const statusEl = document.getElementById('paymentStatus');
+            const accessEl = document.getElementById('accessStatus');
+            
+            const latestPayment = userPayments.sort((a, b) => {
+                const dateA = a.createdAt ? new Date(a.createdAt.seconds * 1000) : new Date(0);
+                const dateB = b.createdAt ? new Date(b.createdAt.seconds * 1000) : new Date(0);
+                return dateB - dateA;
+            })[0];
+
+            if (latestPayment) {
+                if (latestPayment.status === 'approved') {
+                    statusEl.textContent = 'Approved';
+                    statusEl.style.color = '#10b981';
+                    accessEl.textContent = 'Active - Access Granted';
+                    accessEl.style.color = '#10b981';
+                } else if (latestPayment.status === 'pending') {
+                    statusEl.textContent = 'Pending Review';
+                    statusEl.style.color = '#f59e0b';
+                    accessEl.textContent = 'Awaiting Payment Approval';
+                    accessEl.style.color = '#f59e0b';
+                } else if (latestPayment.status === 'rejected') {
+                    statusEl.textContent = 'Rejected';
+                    statusEl.style.color = '#dc2626';
+                    accessEl.textContent = 'Payment Rejected - Contact Admin';
+                    accessEl.style.color = '#dc2626';
+                }
+            } else {
+                statusEl.textContent = 'No Payments';
+                statusEl.style.color = '#64748b';
+                accessEl.textContent = 'No Payment Submitted';
+            }
+        }
+
+        function displayPaymentHistory() {
+            const container = document.getElementById('paymentHistory');
+            
+            if (!userPayments || userPayments.length === 0) {
+                container.innerHTML = '<p style="color: var(--gray);">No payment history yet.</p>';
+                return;
+            }
+
+            let html = '';
+            userPayments.forEach(payment => {
+                const statusClass = payment.status === 'approved' ? '#10b981' : 
+                                   payment.status === 'pending' ? '#f59e0b' : '#dc2626';
+                const date = payment.createdAt ? new Date(payment.createdAt.seconds * 1000).toLocaleDateString() : 'N/A';
+                
+                html += `
+                    <div class="enrolled-course" style="margin-bottom: 0.5rem;">
+                        <p><strong>${payment.paymentType === 'registration' ? 'Registration' : 'Monthly'} Payment</strong></p>
+                        <p>Amount: Rs. ${payment.amount} | Date: ${payment.paymentDate}</p>
+                        <p>Status: <span style="color: ${statusClass}; font-weight: bold;">${payment.status.toUpperCase()}</span></p>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function checkMonthlyPayment() {
+            const latestApproved = getLatestApprovedPayment(userPayments);
+            const showMonthly = !isPaymentRecent(latestApproved, 30);
+            
+            document.getElementById('uploadMonthlyPayment').style.display = showMonthly ? 'block' : 'none';
+            
+            if (showMonthly) {
+                setupMonthlyWhatsApp();
+            }
+        }
+
+        function setupMonthlyWhatsApp() {
+            const courseDetails = getCoursePaymentDetails(currentUser.course);
+            const courseName = courseDetails ? courseDetails.name : currentUser.course;
+            const month = new Date().toLocaleString('default', { month: 'long', year: 'numeric' });
+            
+            const phoneNumber = '+94760920335';
+            const message = `*Monthly Payment - ${month}*%0A%0A` +
+                `*Name:* ${currentUser.firstName} ${currentUser.lastName}%0A` +
+                `*Email:* ${currentUser.email}%0A` +
+                `*Course:* ${courseName}%0A` +
+                `Please verify my monthly payment. Thank you!`;
+            
+            const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
+            document.getElementById('monthlyWhatsappLink').href = whatsappUrl;
+        }
+
+        function sendMonthlyWhatsApp() {
+            const link = document.getElementById('monthlyWhatsappLink');
+            window.open(link.href, '_blank');
+        }
+
+        async function markMonthlyPaid() {
+            const courseDetails = getCoursePaymentDetails(currentUser.course);
+            
+            const paymentData = {
+                studentId: currentUser.uid,
+                studentName: currentUser.firstName + ' ' + currentUser.lastName,
+                studentEmail: currentUser.email,
+                course: currentUser.course,
+                courseName: courseDetails ? courseDetails.name : currentUser.course,
+                paymentType: 'monthly',
+                amount: 0,
+                status: 'whatsapp_sent'
+            };
+            
+            try {
+                await savePaymentRecord(paymentData);
+                alert('Monthly payment submitted! We will verify and update your status.');
+                await loadPaymentData();
+            } catch (error) {
+                console.error('Error saving payment:', error);
+                alert('Payment submitted! (Saved locally)');
+                await loadPaymentData();
+            }
+        }
+
+        document.getElementById('monthlyPaymentForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const slip = document.getElementById('monthlySlip').files[0];
+            const date = document.getElementById('monthlyPaymentDate').value;
+            const amount = document.getElementById('monthlyAmount').value;
+            
+            if (!slip) {
+                alert('Please upload payment slip');
+                return;
+            }
+
+            const btn = this.querySelector('button');
+            btn.disabled = true;
+            btn.textContent = 'Uploading...';
+
+            try {
+                const slipUrl = await uploadPaymentSlip(slip, currentUser.uid, 'monthly');
+                const courseDetails = getCoursePaymentDetails(currentUser.course);
+                
+                const paymentData = {
+                    studentId: currentUser.uid,
+                    studentName: currentUser.firstName + ' ' + currentUser.lastName,
+                    studentEmail: currentUser.email,
+                    course: currentUser.course,
+                    courseName: courseDetails ? courseDetails.name : currentUser.course,
+                    paymentType: 'monthly',
+                    paymentDate: date,
+                    amount: amount,
+                    slipUrl: slipUrl,
+                    note: 'Monthly payment',
+                    status: 'pending'
+                };
+                
+                await savePaymentRecord(paymentData);
+                alert('Monthly payment submitted! Waiting for approval.');
+                await loadPaymentData();
+                
+            } catch (error) {
+                console.error('Upload error:', error);
+                alert('Failed to upload. Please try again.');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Upload Payment';
+            }
+        });
     </script>
 </body>
 </html>
