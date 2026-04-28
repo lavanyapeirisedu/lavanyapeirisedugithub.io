@@ -7,12 +7,13 @@
 // 5. Copy your config and replace the values below
 
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT_ID.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyCbkGqomIrHXo-ei_u5mMxymrmvyRERIvw",
+    authDomain: "online-academy-b127a.firebaseapp.com",
+    projectId: "online-academy-b127a",
+    storageBucket: "online-academy-b127a.firebasestorage.app",
+    messagingSenderId: "93559735552",
+    appId: "1:93559735552:web:1e15140cac19902d359fe5",
+    measurementId: "G-PJYS2SBY3N"
 };
 
 // Initialize Firebase
