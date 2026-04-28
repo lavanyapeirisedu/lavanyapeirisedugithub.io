@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Online Academy</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/main.js" defer></script>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <nav>
+                <a href="index.html" class="logo">Online Academy</a>
+                <div class="mobile-menu" onclick="toggleMobileMenu()">☰</div>
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="about.html">About</a></li>
+                    <li><a href="courses.html">Courses</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+                <div class="nav-auth" id="navAuth">
+                    <a href="dashboard.html" class="btn btn-primary">Dashboard</a>
+                    <button onclick="logout()" class="btn btn-outline">Logout</button>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <section class="dashboard">
+        <div class="container">
+            <div class="dashboard-header">
+                <h1>Welcome, <span id="studentName">Student</span>!</h1>
+            </div>
+
+            <div class="dashboard-stats">
+                <div class="stat-card">
+                    <h3>Enrolled Courses</h3>
+                    <div class="value" id="courseCount">1</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Account Status</h3>
+                    <div class="value" style="font-size: 1.25rem; color: #10b981;">Active</div>
+                </div>
+            </div>
+
+            <div class="dashboard-content">
+                <div class="profile-card">
+                    <h3>My Profile</h3>
+                    <div class="profile-item">
+                        <span class="label">Name</span>
+                        <span class="value" id="profileName">-</span>
+                    </div>
+                    <div class="profile-item">
+                        <span class="label">Email</span>
+                        <span class="value" id="profileEmail">-</span>
+                    </div>
+                    <div class="profile-item">
+                        <span class="label">Phone</span>
+                        <span class="value" id="profilePhone">-</span>
+                    </div>
+                    <div class="profile-item">
+                        <span class="label">Age</span>
+                        <span class="value" id="profileAge">-</span>
+                    </div>
+                    <div class="profile-item">
+                        <span class="label">Exam Year</span>
+                        <span class="value" id="profileExamYear">-</span>
+                    </div>
+                </div>
+
+                <div class="courses-enrolled">
+                    <h3>My Courses</h3>
+                    <div id="myCourses">
+                        <div class="enrolled-course" id="enrolledCourse">
+                            <h4 id="courseTitle">Sinhala Language</h4>
+                            <p id="courseDescription">Complete A/L Sinhala language course covering literature, grammar, and composition.</p>
+                            <p><strong>Status:</strong> Enrolled</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Online Academy</h4>
+                    <p>Quality education for A/L students.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <a href="index.html">Home</a>
+                    <a href="about.html">About</a>
+                    <a href="courses.html">Courses</a>
+                    <a href="contact.html">Contact</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Online Academy. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Check authentication and load user data
+        document.addEventListener('DOMContentLoaded', async function() {
+            const user = JSON.parse(localStorage.getItem('user') || 'null');
+            
+            if (!user || !user.uid) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Initialize Firebase
+            await initFirebase();
+
+            // Load user data
+            loadUserData(user);
+        });
+
+        function loadUserData(user) {
+            const fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Student';
+            
+            document.getElementById('studentName').textContent = user.firstName || 'Student';
+            document.getElementById('profileName').textContent = fullName;
+            document.getElementById('profileEmail').textContent = user.email || '-';
+            document.getElementById('profilePhone').textContent = user.phone || '-';
+            document.getElementById('profileAge').textContent = user.age || '-';
+            document.getElementById('profileExamYear').textContent = user.examYear || '-';
+
+            // Display enrolled course
+            if (user.course) {
+                const courseNames = {
+                    'sinhala': 'Sinhala Language',
+                    'media': 'Media Studies'
+                };
+                
+                const courseDesc = {
+                    'sinhala': 'Complete A/L Sinhala language course covering literature, grammar, and composition.',
+                    'media': 'Comprehensive media studies course covering media literacy, journalism, and communication theories.'
+                };
+
+                document.getElementById('courseTitle').textContent = courseNames[user.course] || user.course;
+                document.getElementById('courseDescription').textContent = courseDesc[user.course] || '';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - Online Academy</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/main.js" defer></script>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <nav>
+                <a href="index.html" class="logo">Online Academy</a>
+                <div class="mobile-menu" onclick="toggleMobileMenu()">☰</div>
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="about.html" class="active">About</a></li>
+                    <li><a href="courses.html">Courses</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+                <div class="nav-auth" id="navAuth">
+                    <a href="login.html" class="btn btn-outline">Login</a>
+                    <a href="register.html" class="btn btn-primary">Register</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <div class="page-header">
+        <div class="container">
+            <h1>About Us</h1>
+            <p>Learn more about Online Academy and our mission</p>
+        </div>
+    </div>
+
+    <section>
+        <div class="container">
+            <div class="about-content">
+                <div class="about-image">🎓</div>
+                <div class="about-text">
+                    <h2>Welcome to Online Academy</h2>
+                    <p>Online Academy is a premier educational institution dedicated to providing quality education for A/L (Advanced Level) students in Sri Lanka. We specialize in Sinhala Language and Media Studies, helping students achieve their academic goals.</p>
+                    
+                    <h3>Our Mission</h3>
+                    <p>To empower students with knowledge and skills needed to excel in their A/L examinations through innovative online learning methods and dedicated teacher support.</p>
+                    
+                    <h3>Our Vision</h3>
+                    <p>To become the leading online education provider for A/L students in Sri Lanka, making quality education accessible to all.</p>
+                    
+                    <h3>Our Founder</h3>
+                    <p>Founded by <strong>Lavanya Peris</strong>, an experienced educator passionate about helping students succeed in their academic journey.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="features">
+        <div class="container">
+            <div class="section-title">
+                <h2>Our Values</h2>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3>Excellence</h3>
+                    <p>We strive for academic excellence in everything we do</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🤝</div>
+                    <h3>Support</h3>
+                    <p>Personalized support for every student</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🚀</div>
+                    <h3>Innovation</h3>
+                    <p>Modern teaching methods for better learning</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💡</div>
+                    <h3>Accessibility</h3>
+                    <p>Quality education available to all</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta">
+        <div class="container">
+            <h2>Join Our Learning Community</h2>
+            <p>Start your journey to academic success today</p>
+            <a href="register.html" class="btn btn-white">Register Now</a>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Online Academy</h4>
+                    <p>Quality education for A/L students. Master Sinhala Language & Media with expert guidance.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <a href="index.html">Home</a>
+                    <a href="about.html">About</a>
+                    <a href="courses.html">Courses</a>
+                    <a href="contact.html">Contact</a>
+                </div>
+                <div class="footer-section">
+                    <h4>Account</h4>
+                    <a href="login.html">Login</a>
+                    <a href="register.html">Register</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Online Academy. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

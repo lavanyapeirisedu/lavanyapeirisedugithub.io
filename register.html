@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Online Academy</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/main.js" defer></script>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <nav>
+                <a href="index.html" class="logo">Online Academy</a>
+                <div class="mobile-menu" onclick="toggleMobileMenu()">☰</div>
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="about.html">About</a></li>
+                    <li><a href="courses.html">Courses</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+                <div class="nav-auth" id="navAuth">
+                    <a href="login.html" class="btn btn-outline">Login</a>
+                    <a href="register.html" class="btn btn-primary">Register</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <div class="page-header">
+        <div class="container">
+            <h1>Register</h1>
+            <p>Create your student account</p>
+        </div>
+    </div>
+
+    <section class="dashboard">
+        <div class="container">
+            <div class="form-container">
+                <form id="registerForm">
+                    <div class="form-group">
+                        <label for="firstName">First Name</label>
+                        <input type="text" id="firstName" name="firstName" required>
+                        <div id="firstNameError" class="form-error hidden"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName">Last Name</label>
+                        <input type="text" id="lastName" name="lastName" required>
+                        <div id="lastNameError" class="form-error hidden"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" name="email" required>
+                        <div id="emailError" class="form-error hidden"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" id="phone" name="phone" required>
+                        <div id="phoneError" class="form-error hidden"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="course">Select Course</label>
+                        <select id="course" name="course" required>
+                            <option value="">Choose a course</option>
+                            <option value="sinhala">Sinhala Language</option>
+                            <option value="media">Media Studies</option>
+                        </select>
+                        <div id="courseError" class="form-error hidden"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="age">Age</label>
+                        <input type="number" id="age" name="age" min="14" max="25" required>
+                        <div id="ageError" class="form-error hidden"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="examYear">Exam Year</label>
+                        <select id="examYear" name="examYear" required>
+                            <option value="">Select year</option>
+                            <option value="2024">2024</option>
+                            <option value="2025">2025</option>
+                            <option value="2026">2026</option>
+                            <option value="2027">2027</option>
+                            <option value="2028">2028</option>
+                        </select>
+                        <div id="examYearError" class="form-error hidden"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" minlength="6" required>
+                        <div id="passwordError" class="form-error hidden"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm Password</label>
+                        <input type="password" id="confirmPassword" name="confirmPassword" required>
+                        <div id="confirmPasswordError" class="form-error hidden"></div>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Register</button>
+                </form>
+                <div class="form-links">
+                    <p>Already have an account? <a href="login.html">Login here</a></p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Online Academy</h4>
+                    <p>Quality education for A/L students.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <a href="index.html">Home</a>
+                    <a href="about.html">About</a>
+                    <a href="courses.html">Courses</a>
+                    <a href="contact.html">Contact</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Online Academy. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const course = document.getElementById('course').value;
+            const age = document.getElementById('age').value;
+            const examYear = document.getElementById('examYear').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            let isValid = true;
+            
+            // Clear previous errors
+            hideError('firstNameError');
+            hideError('lastNameError');
+            hideError('emailError');
+            hideError('phoneError');
+            hideError('courseError');
+            hideError('ageError');
+            hideError('examYearError');
+            hideError('passwordError');
+            hideError('confirmPasswordError');
+            
+            // Validation
+            if (!firstName) {
+                showError('firstNameError', 'First name is required');
+                isValid = false;
+            }
+            if (!lastName) {
+                showError('lastNameError', 'Last name is required');
+                isValid = false;
+            }
+            if (!email) {
+                showError('emailError', 'Email is required');
+                isValid = false;
+            }
+            if (!phone) {
+                showError('phoneError', 'Phone number is required');
+                isValid = false;
+            }
+            if (!course) {
+                showError('courseError', 'Please select a course');
+                isValid = false;
+            }
+            if (!age) {
+                showError('ageError', 'Age is required');
+                isValid = false;
+            }
+            if (!examYear) {
+                showError('examYearError', 'Please select exam year');
+                isValid = false;
+            }
+            if (password.length < 6) {
+                showError('passwordError', 'Password must be at least 6 characters');
+                isValid = false;
+            }
+            if (password !== confirmPassword) {
+                showError('confirmPasswordError', 'Passwords do not match');
+                isValid = false;
+            }
+            
+            if (!isValid) return;
+            
+            const submitBtn = this.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Registering...';
+            
+            try {
+                await initFirebase();
+                
+                const userData = {
+                    firstName,
+                    lastName,
+                    phone,
+                    course,
+                    age,
+                    examYear
+                };
+                
+                await registerUser(email, password, userData);
+                alert('Registration successful! Welcome to Online Academy.');
+                window.location.href = 'dashboard.html';
+            } catch (error) {
+                console.error('Registration error:', error);
+                const message = getErrorMessage(error);
+                alert('Registration failed: ' + message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Register';
+            }
+        });
+    </script>
+</body>
+</html>

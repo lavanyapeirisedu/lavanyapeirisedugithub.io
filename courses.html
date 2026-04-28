@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Courses - Online Academy</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/main.js" defer></script>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <nav>
+                <a href="index.html" class="logo">Online Academy</a>
+                <div class="mobile-menu" onclick="toggleMobileMenu()">☰</div>
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="about.html">About</a></li>
+                    <li><a href="courses.html" class="active">Courses</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+                <div class="nav-auth" id="navAuth">
+                    <a href="login.html" class="btn btn-outline">Login</a>
+                    <a href="register.html" class="btn btn-primary">Register</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <div class="page-header">
+        <div class="container">
+            <h1>Our Courses</h1>
+            <p>Comprehensive courses designed for A/L examination success</p>
+        </div>
+    </div>
+
+    <section>
+        <div class="container">
+            <div class="courses-grid">
+                <div class="course-card">
+                    <div class="course-image">📖</div>
+                    <div class="course-info">
+                        <h3>Sinhala Language</h3>
+                        <p>Complete A/L Sinhala language course covering literature, grammar, and composition. Perfect preparation for the A/L examination.</p>
+                        <div class="course-meta">
+                            <span>👥 50+ Students</span>
+                            <span>📅 6 Months</span>
+                        </div>
+                        <a href="register.html" class="btn btn-primary">Enroll Now</a>
+                    </div>
+                </div>
+                <div class="course-card">
+                    <div class="course-image">📺</div>
+                    <div class="course-info">
+                        <h3>Media Studies</h3>
+                        <p>Comprehensive media studies course covering media literacy, journalism, communication theories, and practical media production.</p>
+                        <div class="course-meta">
+                            <span>👥 30+ Students</span>
+                            <span>📅 6 Months</span>
+                        </div>
+                        <a href="register.html" class="btn btn-primary">Enroll Now</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="features">
+        <div class="container">
+            <div class="section-title">
+                <h2>What You'll Learn</h2>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">📝</div>
+                    <h3>Exam Techniques</h3>
+                    <p>Learn effective strategies to tackle A/L exam questions</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📚</div>
+                    <h3>Comprehensive Materials</h3>
+                    <p>Access complete study materials and resources</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">✅</div>
+                    <h3>Practice Tests</h3>
+                    <p>Regular assessments to track your progress</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💬</div>
+                    <h3>Expert Guidance</h3>
+                    <p>One-on-one support from experienced teachers</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta">
+        <div class="container">
+            <h2>Enroll Today!</h2>
+            <p>Take the first step towards A/L examination success</p>
+            <a href="register.html" class="btn btn-white">Register Now</a>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Online Academy</h4>
+                    <p>Quality education for A/L students. Master Sinhala Language & Media with expert guidance.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <a href="index.html">Home</a>
+                    <a href="about.html">About</a>
+                    <a href="courses.html">Courses</a>
+                    <a href="contact.html">Contact</a>
+                </div>
+                <div class="footer-section">
+                    <h4>Account</h4>
+                    <a href="login.html">Login</a>
+                    <a href="register.html">Register</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Online Academy. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
