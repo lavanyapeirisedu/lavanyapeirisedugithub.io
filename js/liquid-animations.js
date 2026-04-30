@@ -87,7 +87,7 @@ function initSmoothParallax() {
     if (!hero) return;
 
     window.addEventListener('scroll', () => {
-        const scrolled = window.pageYOffset;
+        const scrolled = window.pageYOffset || document.documentElement.scrollTop;
         const rate = scrolled * 0.5;
         hero.style.transform = `translate3d(0, ${rate}px, 0)`;
     });
@@ -186,6 +186,31 @@ function initClickShine() {
     });
 }
 
+function initScrollToBottom() {
+    const btn = document.createElement('button');
+    btn.className = 'scroll-to-bottom';
+    btn.setAttribute('aria-label', 'Scroll to bottom');
+    btn.title = 'Scroll to bottom';
+    document.body.appendChild(btn);
+
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 300) {
+            btn.classList.add('visible');
+        } else {
+            btn.classList.remove('visible');
+        }
+    });
+
+    btn.addEventListener('click', () => {
+        const footer = document.querySelector('footer');
+        if (footer) {
+            footer.scrollIntoView({ behavior: 'smooth' });
+        } else {
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        }
+    });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     initScrollReveal();
     initLiquidHover();
@@ -194,4 +219,5 @@ document.addEventListener('DOMContentLoaded', () => {
     initGradientBorder();
     initLiquidBlob();
     initClickShine();
+    initScrollToBottom();
 });
