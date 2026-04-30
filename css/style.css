@@ -1155,3 +1155,98 @@ body {
 .scroll-to-bottom.bounce {
     animation: bounce 2s infinite;
 }
+
+/* Page Navigation Indicator */
+.page-nav {
+    position: fixed;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    z-index: 1000;
+}
+
+.page-nav-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--glass-white);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    cursor: url('../images/pen-cursor.svg') 0 24, pointer;
+    transition: all 0.3s;
+    position: relative;
+}
+
+.page-nav-dot.active {
+    background: var(--cyan);
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+    transform: scale(1.3);
+}
+
+.page-nav-dot::after {
+    content: attr(data-label);
+    position: absolute;
+    right: 25px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--glass-white);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    color: var(--white);
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+}
+
+.page-nav-dot:hover::after {
+    opacity: 1;
+}
+
+/* Smooth page transition overlay */
+.page-transition {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--cyan), var(--magenta));
+    z-index: 9999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s;
+}
+
+.page-transition.active {
+    opacity: 1;
+}
+
+/* Next Page Hint */
+.next-page-hint {
+    position: fixed;
+    bottom: 100px;
+    right: 30px;
+    background: var(--glass-cyan);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 212, 255, 0.3);
+    padding: 10px 15px;
+    border-radius: 20px;
+    color: var(--white);
+    font-size: 0.875rem;
+    cursor: url('../images/pen-cursor.svg') 0 24, pointer;
+    z-index: 999;
+    transition: all 0.3s;
+    opacity: 0;
+}
+
+.next-page-hint:hover {
+    background: var(--glass-magenta);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-glow-magenta);
+}

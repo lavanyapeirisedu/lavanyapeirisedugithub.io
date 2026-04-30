@@ -211,6 +211,87 @@ function initScrollToBottom() {
     });
 }
 
+function initPageNavigation() {
+    const pages = [
+        { name: 'home', label: 'Home', file: 'index.html' },
+        { name: 'about', label: 'About', file: 'about.html' },
+        { name: 'courses', label: 'Courses', file: 'courses.html' },
+        { name: 'contact', label: 'Contact', file: 'contact.html' }
+    ];
+    
+    const nav = document.createElement('div');
+    nav.className = 'page-nav';
+    
+    pages.forEach(page => {
+        const dot = document.createElement('div');
+        dot.className = 'page-nav-dot';
+        dot.setAttribute('data-label', page.label);
+        dot.setAttribute('data-page', page.name);
+        
+        dot.addEventListener('click', () => {
+            navigateToPage(page.file);
+        });
+        
+        nav.appendChild(dot);
+    });
+    
+    document.body.appendChild(nav);
+    updateActivePage(pages);
+}
+
+function navigateToPage(pageFile) {
+    const overlay = document.createElement('div');
+    overlay.className = 'page-transition';
+    document.body.appendChild(overlay);
+    
+    setTimeout(() => {
+        overlay.classList.add('active');
+    }, 10);
+    
+    setTimeout(() => {
+        window.location.href = pageFile;
+    }, 400);
+}
+
+function updateActivePage(pages) {
+    const currentFile = window.location.pathname.split('/').pop() || 'index.html';
+    
+    document.querySelectorAll('.page-nav-dot').forEach(dot => {
+        const pageName = dot.getAttribute('data-page');
+        const page = pages.find(p => p.name === pageName);
+        
+        if (page && page.file === currentFile) {
+            dot.classList.add('active');
+        } else {
+            dot.classList.remove('active');
+        }
+    });
+}
+
+function initNextPageHint() {
+    const currentFile = window.location.pathname.split('/').pop() || 'index.html';
+    const pageOrder = ['index.html', 'about.html', 'courses.html', 'contact.html'];
+    const currentIndex = pageOrder.indexOf(currentFile);
+    
+    if (currentIndex < pageOrder.length - 1) {
+        const nextPage = pageOrder[currentIndex + 1];
+        const hint = document.createElement('div');
+        hint.className = 'next-page-hint';
+        hint.textContent = '↓ Next Page';
+        hint.onclick = () => navigateToPage(nextPage);
+        
+        document.body.appendChild(hint);
+        
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > document.body.scrollHeight - window.innerHeight - 500) {
+                hint.style.opacity = '1';
+            } else {
+                hint.style.opacity = '0';
+            }
+        });
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     initScrollReveal();
     initLiquidHover();
@@ -220,4 +301,6 @@ document.addEventListener('DOMContentLoaded', () => {
     initLiquidBlob();
     initClickShine();
     initScrollToBottom();
+    initPageNavigation();
+    initNextPageHint();
 });
