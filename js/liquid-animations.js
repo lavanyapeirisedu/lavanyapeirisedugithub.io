@@ -292,6 +292,16 @@ function initNextPageHint() {
     }
 }
 
+function toggleLecturerDetails(card) {
+    card.classList.toggle('expanded');
+    const hint = card.querySelector('.expand-hint span:first-child');
+    if (card.classList.contains('expanded')) {
+        hint.textContent = 'Click to collapse';
+    } else {
+        hint.textContent = 'Click to view more';
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     initScrollReveal();
     initLiquidHover();
