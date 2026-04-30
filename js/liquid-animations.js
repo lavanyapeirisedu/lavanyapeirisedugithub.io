@@ -162,6 +162,30 @@ function initLiquidBlob() {
     });
 }
 
+function initClickShine() {
+    document.addEventListener('click', (e) => {
+        const shine = document.createElement('div');
+        shine.style.cssText = `
+            position: fixed;
+            left: ${e.clientX - 50}px;
+            top: ${e.clientY - 50}px;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: radial-gradient(circle, 
+                rgba(0, 212, 255, 0.6) 0%, 
+                rgba(255, 0, 255, 0.3) 40%, 
+                transparent 70%);
+            pointer-events: none;
+            z-index: 9999;
+            animation: shineExpand 0.6s ease-out forwards;
+        `;
+        document.body.appendChild(shine);
+        
+        setTimeout(() => shine.remove(), 600);
+    });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     initScrollReveal();
     initLiquidHover();
@@ -169,4 +193,5 @@ document.addEventListener('DOMContentLoaded', () => {
     initSmoothParallax();
     initGradientBorder();
     initLiquidBlob();
+    initClickShine();
 });

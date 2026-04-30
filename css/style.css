@@ -30,14 +30,19 @@
 }
 
 body {
-    line-height: 1.6;
+    line-height:1.6;
     color: var(--white);
     background: var(--bg-dark);
-    min-height: 100vh;
+    min-height:100vh;
     display: flex;
     flex-direction: column;
     overflow-x: hidden;
     position: relative;
+    cursor: url('../images/pen-cursor.svg') 0 24, auto;
+}
+
+a, button, .btn, .nav-links a, input, select, textarea {
+    cursor: url('../images/pen-cursor.svg') 0 24, pointer;
 }
 
 body::before {
@@ -1083,4 +1088,15 @@ footer::before {
     border-radius: var(--radius-sm);
     margin-bottom: 1.5rem;
     color: var(--white);
+}
+
+@keyframes shineExpand {
+    0% {
+        transform: scale(0.3);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(2);
+        opacity: 0;
+    }
 }
